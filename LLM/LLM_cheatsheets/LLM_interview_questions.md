@@ -66,4 +66,5 @@ x &x > 0 \\
 ```math
 SwiGLU(x) = x \sigma (\beta*x) + (1 - \sigma(\beta*x)) * (Wx + b)
 ```
-   
+
+4. Waht is RMSNorm? It's an improved version of layer normalization. Instead of subtracting the mean and dividing over std, rmsnorm calculates the l2 norm of the input embedding vector and normalize over it.
