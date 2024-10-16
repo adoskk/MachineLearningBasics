@@ -68,3 +68,4 @@ SwiGLU(x) = x \sigma (\beta*x) + (1 - \sigma(\beta*x)) * (Wx + b)
 ```
 
 4. Waht is RMSNorm? It's an improved version of layer normalization. Instead of subtracting the mean and dividing over std, rmsnorm calculates the l2 norm of the input embedding vector and normalize over it.
+5. What are the mainstream LLMs? BERT (encoder only), GPT (decoder only), T5 (encoder-decoder), Llama (smaller than GPT3, with RoPE, RMSNorm, KV Cache and MQA), Mistral (RoPE,MOE, KV Cache, MQA, Sliding Window Attention) 
