@@ -52,4 +52,18 @@ PE(n, 2*k+1) &= &\cos{\frac{n}{10000^{2*k/d^{model}}}}
 
 1. What is RAG? Retrieval augmented generation - pass in relevant documents as contextual information to the LLM for generation purposes. Usually, it includes a few steps: convert relevant documents into vector embeddings; the embeddings are passed together with the prompt into the LLM for generation purposes
 2. What is LoRA? Is low-rank adaptation for supervised fine-tuning of LLMs. Instead of finetuning the original LLM, LoRA keeps the pretrained Linear/self-attention layer weights unchanged and only train the the multiplication of two low-rank matrices so to reduce computation cost.
-3. 
+3. What is ReLU, GeLU, and SwiGLU?
+
+```math
+
+ReLU(x) = \left\{
+\begin{aligned}
+x &x > 0 \\
+0 &\text{else}
+\end{aligned} \right.
+```
+
+```math
+SwiGLU(x) = x \sigma (\beta*x) + (1 - \sigma(\beta*x)) * (Wx + b)
+```
+   
