@@ -71,4 +71,5 @@ SwiGLU(x) &= &x \sigma (\beta*x) + (1 - \sigma(\beta*x)) * (Wx + b)
 
 
 4. Waht is RMSNorm? It's an improved version of layer normalization. Instead of subtracting the mean and dividing over std, rmsnorm calculates the l2 norm of the input embedding vector and normalize over it.
-5. What are the mainstream LLMs? BERT (encoder only), GPT (decoder only), T5 (encoder-decoder), Llama (smaller than GPT3, with RoPE, RMSNorm, KV Cache and MQA), Mistral (RoPE,MOE, KV Cache, MQA, Sliding Window Attention) 
+5. What are the different normalization techniques of BERT, GPT, and Llama? Why most LLM uses pre-norm than post-norm? BERT uses post-layer normalization, GPT uses pre-layer normalization, and Llama uses Pre-layer RMS normalization. Pre-norm means the normalization is added before the self-attention layer and FFW, which normalizes the input so the training is more stable and the model converges faster.
+6. What are the mainstream LLMs? BERT (encoder only), GPT (decoder only), T5 (encoder-decoder), Llama (smaller than GPT3, with RoPE, RMSNorm, KV Cache and MQA), Mistral (RoPE,MOE, KV Cache, MQA, Sliding Window Attention) 
