@@ -40,8 +40,8 @@ PE(n, 2*k+1) &= &\cos{\frac{n}{10000^{2*k/d^{model}}}}
   \end{aligned}
   ```
 
-  4. What's the difference between encoder and decoder?
- For transformers, the decoder uses cross-attention which takes query/key from the encoder
+  4. What's the difference between encoder and decoder in transformers?
+ For transformers, the encoder layer is self-attention layer + FFW layer; the decoder layer is self-attention layer + cross-attention (query/key from the encoder) + FFW. 
 
   5. What is layer normalization?
      To differntiate from the batch normalization, which normalize each feature point individually within each batch; LN normalized over each hidden dimension so it doesn't require input to be of the same lengths
