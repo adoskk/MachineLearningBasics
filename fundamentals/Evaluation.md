@@ -19,6 +19,19 @@ A straightforward comparison of the Precision-Recall and ROC Curve can be found 
 
 * To answer the second question above (how to choose the best threshold $t_k$), we can compare the distances between $<FPR, Recall>$ or $<Precision, Recall>$ pairs and choose the pair with the minimal absolute difference (see [example](https://www.iguazio.com/glossary/classification-threshold/#:~:text=The%20ROC%20curve%20gives%20a,FPR%E2%80%94is%20the%20optimal%20threshold.))
 
+How do you intuitively understand the ROC and PR curves? For example, if we have a binomial distribution of samples (P and N):
+![image](https://github.com/user-attachments/assets/3bb8746e-6c48-452f-a36e-1acfba1d98c4)
+
+For any machine learning model designed, the goal is to successfully separate the P samples from the N samples. If the model has a very high threshold then $TP$ and $FP$ are both $0$, which makes $FPR_k=\frac{FP_k}{FP_k+TN_k}=0$ and $Recall_k=\frac{TP_k}{TP_k + FN_k}=0$, and it corresponds the ROC curve on the bottom left corner:
+![image](https://github.com/user-attachments/assets/411c6e29-12c5-4b08-80c8-4858be4de188)
+
+If the model has a very low threshold then $TN$ and $FN$ are both $0$, which makes $FPR_k=\frac{FP_k}{FP_k+TN_k}=1$ and $Recall_k=\frac{TP_k}{TP_k + FN_k}=1$, which corresponds the point on the ROC curve on top right:
+![image](https://github.com/user-attachments/assets/1e319632-fd1d-4cf5-8b1e-ae5cd3f4b588)
+
+For PR curve it's the other way around. There is a "perfect" split so the PR curve will reach its furthest point, and then either precision or recall will drop if the model shifts toward left or right:
+![image](https://github.com/user-attachments/assets/3ab37fdc-e9f7-49ae-adef-bd6ac7ed8658)
+
+
 
 ### Q&A
 1. When to choose Precision-Recall Curve and when to choose ROC Curve?\
