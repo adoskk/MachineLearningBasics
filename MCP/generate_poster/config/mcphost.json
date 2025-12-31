@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "generate_poster": {
+      "command": "/Users/mengliuz/Documents/Projects/test_mcp/generate_poster/.venv/bin/python3",
+      "args": [
+        "/Users/mengliuz/Documents/Projects/test_mcp/generate_poster/generate_poster.py"
+      ]
+    }
+  }
+}
