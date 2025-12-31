@@ -2,6 +2,9 @@
 
 An automated poster generation system that extracts content from academic PDFs and creates professional PowerPoint posters using AI. Built with Model Context Protocol (MCP), Ollama, and local LLMs.
 
+![Example](images/Illustration.png "Example: Converting attention_is_all_you_need.pdf to 1-page poster")
+*Example: Converting attention_is_all_you_need.pdf to 1-page poster.*
+
 ## 🎯 Features
 
 - **Automatic PDF Analysis**: Extracts text and images from academic papers
@@ -421,52 +424,6 @@ summary_response = requests.post(
     timeout=120  # Increase for complex papers
 )
 ```
-
-## 📝 Updating the System
-
-### Update Python packages
-```bash
-source .venv/bin/activate
-pip install --upgrade fastmcp pypdf pillow python-pptx
-```
-
-### Update mcphost
-```bash
-go install github.com/mark3labs/mcphost@latest
-```
-
-### Update Ollama
-```bash
-# macOS
-brew upgrade ollama
-
-# Linux
-curl -fsSL https://ollama.ai/install.sh | sh
-```
-
-### Update models
-```bash
-ollama pull qwen3:30b
-```
-
-## 📄 License
-
-MIT License - Feel free to modify and distribute
-
-## 🤝 Contributing
-
-Contributions welcome! Please:
-1. Fork the repository
-2. Create a feature branch
-3. Submit a pull request
-
-## 💡 Tips
-
-- **Use descriptive PDF filenames** for better poster titles
-- **Place high-quality PDFs** for better image extraction
-- **Check the debug log** if something fails
-- **Pre-load models** to avoid timeouts
-- **Monitor RAM usage** with `htop` or Activity Monitor
 
 ## 📧 Support
 
