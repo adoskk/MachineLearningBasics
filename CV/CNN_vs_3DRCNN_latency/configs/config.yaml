@@ -1,0 +1,57 @@
+# Task framing: lesion-focused detection vs per-slice classification
+# Both heads solve the SAME clinical question: "where is the lesion?"
+#  - 3D Faster R-CNN: predicts 3D boxes (x1,y1,z1,x2,y2,z2) + scores per volume
+#  - Slice classifier: predicts P(lesion | axial slice), batched over slices
+dataset:
+  hf_repo: "mrmrx/CADS-dataset"   # gated — requires `hf auth login` + access approval
+  subsets: ["0003_kits21", "0004_lits"]  # kidney-tumor + liver-tumor style, small & lesion-relevant
+  # CADS segs are per-case subdirs of part_55X files (one per specialist model).
+  # Model-551 = abdominal organs (Spleen=1, Kidney R=2, Kidney L=3, Liver=5, ...).
+  seg_parts: [551]
+  # Organ focus per subset (Model-551 label ids). Missing entry = any foreground.
+  subset_labels:
+    0003_kits21: [2, 3]           # Kidney R/L (KiTS kidney-tumor proxy)
+    0004_lits: [5]                # Liver (LiTS liver-tumor proxy)
+  n_volumes: 30                   # minimal-training budget (Colab-friendly)
+  split: [0.8, 0.1, 0.1]
+  seed: 42
+  # Set use_synthetic=true for CPU smoke tests without HF access
+  use_synthetic: false
+  n_synthetic: 8
+
+preprocess:
+  target_shape: [64, 128, 128]    # (D, H, W) after resize — keeps 3D R-CNN in Colab memory
+  hu_window: [-160, 240]          # abdominal soft-tissue window (KiTS/LiTS-ish)
+  normalize: true
+  slice_positive_thresh: 10       # pixels of mask on a slice to call it positive
+  min_component_voxels: 200       # drop tiny mask specks when deriving boxes
+  min_box_size: 5                 # voxels per side
+
+detection:
+  backbone: "r3d_18"              # torchvision.video.r3d_18, Kinetics-pretrained if available
+  pretrained_backbone: true
+  anchor_sizes: [16, 32, 64]      # cubic anchors in voxels (on resized volume)
+  rpn_pre_nms: 1000
+  rpn_post_nms: 256
+  roi_size: [7, 7, 7]
+  box_score_thresh: 0.3
+  nms_thresh: 0.4
+  lr: 5.0e-4
+  epochs: 5
+  batch_size: 1                   # volumes per step (3D memory!)
+
+classification:
+  backbone: "resnet18"            # torchvision resnet18, 1-channel stem
+  pretrained: true
+  batch_size: 32                  # slices per batch — THIS is the "batch classification" knob
+  lr: 1.0e-3
+  epochs: 5
+  num_workers: 2
+
+benchmark:
+  device: "auto"                  # auto | cuda | cpu
+  warmup: 5
+  repeats: 20
+  batch_sizes_cls: [1, 8, 32]     # sweep to show batching effect on time/memory
+  measure_peak_memory: true
+  output_dir: "results"
