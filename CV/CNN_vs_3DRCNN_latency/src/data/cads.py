@@ -29,6 +29,7 @@ from __future__ import annotations
 
 import os
 import re
+import errno
 from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Optional, Tuple
@@ -491,6 +492,16 @@ def load_volumes(
             if s.mask.sum() == 0:
                 n_empty += 1
             out.append(s)
+        except OSError as e:  # Drive FUSE drops show up as ENOTCONN, not missing files
+            if e.errno in (errno.ENOTCONN, 107):  # 107 = Linux ENOTCONN; errno covers the rest
+                raise RuntimeError(
+                    "STOP: Drive mount dropped mid-read ('Transport endpoint is not "
+                    "connected'). Listing files works but reads fail — nothing past "
+                    "this point can succeed. Restart the Colab runtime (or "
+                    "drive.mount(..., force_remount=True)) and keep bulk NIfTI "
+                    "data on local SSD (/content/...), not Drive."
+                ) from e
+            print(f"[cads] skip {ip.name}: {e}")
         except Exception as e:  # corrupt file -> skip, keep going
             print(f"[cads] skip {ip.name}: {e}")
     if n_empty:

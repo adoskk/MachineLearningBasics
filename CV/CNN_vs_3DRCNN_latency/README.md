@@ -77,11 +77,12 @@ scripts/analyze_data.py  # standalone EDA entry point (figures + summary json)
 src/models/              # faster_rcnn_3d.py, slice_classifier.py (architectures only)
 src/detector/            # detector TRACK: train.py, evaluate.py, benchmark.py
 src/classifier/          # classifier TRACK: train.py, evaluate.py, benchmark.py
-src/eval/                # metrics.py, compare.py (side-by-side report, owns no model logic)
+src/eval/                # metrics.py, compare.py, profile.py (stage + operator attribution)
 src/utils/common.py      # shared config/device/cohort/checkpoint helpers
 scripts/train_detector.py / test_detector.py      # work on the detector alone
 scripts/train_classifier.py / test_classifier.py  # work on the classifier alone
 scripts/run_benchmark.py # thin orchestrator: trains/loads both, compares latency+memory
+scripts/profile_models.py# explains cost: 3D convs, NMS, RoI pooling, copies, top GPU ops
 notebooks/colab_benchmark.ipynb
 ```
 
