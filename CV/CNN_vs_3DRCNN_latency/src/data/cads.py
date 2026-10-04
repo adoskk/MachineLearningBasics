@@ -52,6 +52,8 @@ class VolumeSample:
     mask: np.ndarray        # (D, H, W) uint8, resized with nearest
     boxes: np.ndarray       # (N, 6) float32 in voxel coords x1,y1,z1,x2,y2,z2
     slice_labels: np.ndarray  # (D,) int64, 1 if slice has >= thresh mask px
+    img_path: str = ""      # source NIfTI (for native-resolution EDA); "" = synthetic
+    seg_path: str = ""      # source seg case dir ("" = synthetic)
 
 
 def hu_window(img: np.ndarray, window: Tuple[float, float]) -> np.ndarray:
@@ -159,7 +161,39 @@ def load_nifti_pair(
         boxes[:, [2, 5]] = np.clip(boxes[:, [2, 5]], 0, D)
     sl = mask_to_slice_labels(msk_r, thresh=slice_thresh)
     vid = Path(img_path).name.replace(".nii.gz", "").replace(".nii", "")
-    return VolumeSample(volume_id=vid, volume=img_r, mask=msk_r, boxes=boxes, slice_labels=sl)
+    return VolumeSample(volume_id=vid, volume=img_r, mask=msk_r, boxes=boxes,
+                        slice_labels=sl, img_path=str(img_path), seg_path=str(seg_case_dir))
+
+
+def _load_dhw(path: str | Path, dtype=np.float32) -> np.ndarray:
+    """Load a NIfTI and transpose to (D, H, W) axial-first, matching the loader."""
+    arr = nib.load(str(path)).get_fdata(dtype=dtype)
+    if arr.ndim != 3:
+        raise ValueError(f"expected 3D nifti, got {arr.shape} in {path}")
+    return np.transpose(arr, (2, 0, 1))
+
+
+def native_header_dhw(img_path: str | Path) -> Tuple[Tuple[int, int, int], Tuple[float, float, float]]:
+    """Native (D,H,W) grid shape + voxel spacing in mm, without loading voxels."""
+    h = nib.load(str(img_path))
+    sh = h.shape[:3]
+    z = tuple(float(v) for v in h.header.get_zooms()[:3])
+    return (sh[2], sh[0], sh[1]), (z[2], z[0], z[1])
+
+
+def load_native_mask(img_path: str | Path, seg_case_dir: str | Path,
+                     parts: Tuple[int, ...] = (551,),
+                     label_ids: Optional[List[int]] = None) -> Tuple[np.ndarray, Tuple[float, float, float]]:
+    """Binary target mask at NATIVE resolution + (D,H,W) spacing. For EDA."""
+    ref_shape, spacing = native_header_dhw(img_path)
+    msk = np.zeros(ref_shape, dtype=np.uint8)
+    for pf in _case_part_files(Path(seg_case_dir), parts):
+        pm = _load_dhw(pf, np.int64)
+        if pm.shape != ref_shape:
+            raise ValueError(f"part geometry mismatch: {pf} {pm.shape} vs {ref_shape}")
+        hit = np.isin(pm, np.asarray(label_ids)).astype(np.uint8) if label_ids is not None else (pm > 0).astype(np.uint8)
+        msk = np.maximum(msk, hit)
+    return msk, spacing
 
 
 def _match_key(p: Path) -> str:

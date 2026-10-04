@@ -72,6 +72,8 @@ with batch size until GPU RAM caps it — that crossover is the point of the plo
 ```
 configs/config.yaml      # all knobs (subset, sizes, epochs, batch sweep)
 src/data/                # cads.py (HF -> boxes + slice labels), synthetic.py, datasets.py
+src/data/analyze.py      # EDA: splits, native resolution/spacing, object sizes/locations
+scripts/analyze_data.py  # standalone EDA entry point (figures + summary json)
 src/models/              # faster_rcnn_3d.py, slice_classifier.py (architectures only)
 src/detector/            # detector TRACK: train.py, evaluate.py, benchmark.py
 src/classifier/          # classifier TRACK: train.py, evaluate.py, benchmark.py

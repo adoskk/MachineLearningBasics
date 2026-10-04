@@ -17,7 +17,7 @@ CLS_CKPT = "checkpoints/slice_classifier.pt"
 
 # Bump on every functional change. Scripts print this at startup so you can
 # verify Colab/Drive is executing the version you think it is.
-VERSION = "0.7.0"
+VERSION = "0.8.0"
 
 
 def log_version(tag: str) -> None:
