@@ -27,10 +27,12 @@ not different image features.
 
 ## Metrics
 
-The primary report includes accuracy, balanced accuracy, precision, recall,
-F1, AUROC, AP, confusion matrix, per-subset metrics, trainable head parameters,
-and head latency. Confidence intervals resample complete volumes because
-overlapping windows are not independent.
+The primary report includes window accuracy, equal-weight macro volume
+accuracy, balanced accuracy, precision, recall, F1, AUROC, AP, confusion
+matrix, per-subset metrics, trainable head parameters, and head latency.
+Confidence intervals resample complete volumes because overlapping windows
+are not independent. The default 300-volume cohort is split 70/15/15 and
+stratified by CADS subset, giving about 45 independent test volumes.
 
 Raw accuracy can be misleading under class imbalance; inspect balanced
 accuracy, F1, and AP alongside it.
@@ -41,7 +43,7 @@ Open `notebooks/colab_window_sequence.ipynb`, or run:
 
 ```bash
 python scripts/download_subset.py --subsets 0003_kits21 0004_lits \
-  --local-dir /content/data/cads --max-files 120 --parts 551
+  --local-dir /content/data/cads --max-files 600 --parts 551
 python scripts/train_baseline.py --data-root /content/data/cads
 python scripts/prepare_windows.py --data-root /content/data/cads
 python scripts/train_temporal.py

@@ -1,12 +1,13 @@
 """Shared config, device, cohort, split, and checkpoint helpers."""
 from __future__ import annotations
 
+from collections import Counter
 from pathlib import Path
 
 import torch
 import yaml
 
-VERSION = "1.0.0"
+VERSION = "1.1.0"
 BASELINE_CKPT = "checkpoints/slice_baseline.pt"
 
 
@@ -55,6 +56,8 @@ def split_cohort(samples, cfg):
     splits = split_samples(samples, tuple(ds["split"]), int(ds["split_seed"]))
     save_split_manifest(*splits, cfg["artifacts"]["split_manifest"], int(ds["split_seed"]))
     print("[data] train/val/test =", "/".join(str(len(x)) for x in splits))
+    for name, split in zip(("train", "val", "test"), splits):
+        print(f"[data] {name} subsets={dict(sorted(Counter(s.subset for s in split).items()))}")
     return splits
 
 

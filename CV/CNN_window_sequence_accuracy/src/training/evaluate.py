@@ -57,6 +57,20 @@ def _subset_metrics(pred, threshold):
     return out
 
 
+def _volume_accuracy(pred, threshold):
+    """Give each test volume equal weight despite overlapping windows."""
+    labels = np.asarray(pred["labels"])
+    probabilities = np.asarray(pred["probabilities"])
+    volume_ids = np.asarray(pred["volume_ids"])
+    per_volume = {}
+    for volume_id in np.unique(volume_ids):
+        idx = volume_ids == volume_id
+        per_volume[str(volume_id)] = float(
+            np.mean((probabilities[idx] >= threshold).astype(int) == labels[idx])
+        )
+    return float(np.mean(list(per_volume.values()))), per_volume
+
+
 def evaluate_models(models, val_ds, test_ds, cfg, device, output_dir="results"):
     """models excludes baseline; baseline_max is derived from cached slice logits."""
     out = Path(output_dir)
@@ -65,6 +79,13 @@ def evaluate_models(models, val_ds, test_ds, cfg, device, output_dir="results"):
     val_predictions, test_predictions, report = {}, {}, {}
     threshold_metric = cfg["window"]["threshold_metric"]
     repeats = int(cfg["window"]["bootstrap_repeats"])
+    test_volume_ids = sorted({r.volume_id for r in test_ds.records})
+    test_volumes_by_subset = {
+        str(subset): len({r.volume_id for r in test_ds.records if r.subset == subset})
+        for subset in sorted({r.subset for r in test_ds.records})
+    }
+    print(f"[test] cohort={len(test_volume_ids)} independent volumes, "
+          f"{len(test_ds)} overlapping windows | subsets={test_volumes_by_subset}")
 
     for name, model in all_models.items():
         val_pred = baseline_predictions(val_ds) if model is None else predict_head(model, val_ds, device)
@@ -77,6 +98,9 @@ def evaluate_models(models, val_ds, test_ds, cfg, device, output_dir="results"):
             test_pred["labels"], test_pred["probabilities"], test_pred["volume_ids"],
             threshold, repeats=repeats,
         )
+        macro_accuracy, per_volume_accuracy = _volume_accuracy(test_pred, threshold)
+        metrics["macro_volume_accuracy"] = macro_accuracy
+        metrics["per_volume_accuracy"] = per_volume_accuracy
         metrics["per_subset"] = _subset_metrics(test_pred, threshold)
         metrics["head_parameters"] = 0 if model is None else count_parameters(model)
         metrics["head_ms_per_window"] = _latency(model, test_ds, device)
@@ -88,14 +112,18 @@ def evaluate_models(models, val_ds, test_ds, cfg, device, output_dir="results"):
 
     payload = {
         "window_size": int(test_ds.records[0].end - test_ds.records[0].start),
+        "n_test_volumes": len(test_volume_ids),
         "n_test_windows": len(test_ds),
+        "effective_grouped_n": len(test_volume_ids),
+        "test_volumes_by_subset": test_volumes_by_subset,
         "threshold_selected_on": "validation",
         "metrics": report,
     }
     (out / "window_comparison.json").write_text(json.dumps(payload, indent=2))
     with open(out / "window_comparison.csv", "w", newline="") as f:
-        fields = ["model", "accuracy", "balanced_accuracy", "precision", "recall",
-                  "f1", "auroc", "ap", "head_parameters", "head_ms_per_window"]
+        fields = ["model", "accuracy", "macro_volume_accuracy",
+                  "balanced_accuracy", "precision", "recall", "f1", "auroc",
+                  "ap", "head_parameters", "head_ms_per_window"]
         writer = csv.DictWriter(f, fieldnames=fields)
         writer.writeheader()
         for name, row in report.items():

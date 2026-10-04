@@ -5,9 +5,9 @@ dataset:
   subset_labels:
     0003_kits21: [2, 3]  # right/left kidney
     0004_lits: [5]       # liver
-  n_volumes: 60
+  n_volumes: 300
   n_synthetic: 12
-  split: [0.8, 0.1, 0.1]
+  split: [0.7, 0.15, 0.15]
   seed: 42
   split_seed: 2026
   use_synthetic: false

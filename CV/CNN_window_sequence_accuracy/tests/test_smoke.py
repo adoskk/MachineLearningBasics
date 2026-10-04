@@ -17,8 +17,12 @@ from src.models.temporal_heads import MODEL_NAMES, build_temporal_model
 
 def test_all_models_and_windows():
     samples = make_synthetic_cohort(12, shape=(32, 64, 64), seed=1)
+    for i, sample in enumerate(samples):
+        sample.subset = "kits" if i < 6 else "lits"
     train, val, test = split_samples(samples, (0.7, 0.15, 0.15), seed=9)
     assert not ({s.volume_id for s in train} & {s.volume_id for s in test})
+    assert all({s.subset for s in split} == {"kits", "lits"}
+               for split in (train, val, test))
 
     with tempfile.TemporaryDirectory() as tmp:
         spec = compute_window_spec(train, 95, 10, Path(tmp) / "q95.json")
